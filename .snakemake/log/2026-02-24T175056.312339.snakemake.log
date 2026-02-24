@@ -1,0 +1,54 @@
+Assuming unrestricted shared filesystem usage.
+host: DESKTOP-VPSEKSF
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                   count
+------------------  -------
+build_cai_model           1
+identify_ribosomal        1
+total                     2
+
+Select jobs to execute...
+Execute 1 jobs...
+[Tue Feb 24 17:50:56 2026]
+localrule identify_ribosomal:
+    input: data/GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assembly_version_1.0_genomic.gff
+    output: results/ribosomal_ids.txt
+    jobid: 2
+    reason: Missing output files: results/ribosomal_ids.txt
+    resources: tmpdir=/tmp
+[Tue Feb 24 17:50:57 2026]
+Finished jobid: 2 (Rule: identify_ribosomal)
+1 of 2 steps (50%) done
+Select jobs to execute...
+Execute 1 jobs...
+[Tue Feb 24 17:50:57 2026]
+localrule build_cai_model:
+    input: results/all_cds.fasta, results/ribosomal_ids.txt
+    output: results/codon_weights.json
+    jobid: 0
+    reason: Missing output files: results/codon_weights.json; Input files updated by another job: results/ribosomal_ids.txt
+    resources: tmpdir=/tmp
+RuleException:
+CalledProcessError in file "/home/anirudh/codon_optimization/Snakefile", line 60:
+Command 'set -euo pipefail;  /root/miniconda3/envs/snakemake/bin/python3.13 /home/anirudh/codon_optimization/.snakemake/scripts/tmp4t_etlw6.build_cai_model.py' returned non-zero exit status 1.
+[Tue Feb 24 17:50:57 2026]
+Error in rule build_cai_model:
+    message: None
+    jobid: 0
+    input: results/all_cds.fasta, results/ribosomal_ids.txt
+    output: results/codon_weights.json
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look below for error messages
+[Tue Feb 24 17:50:57 2026]
+Error in rule build_cai_model:
+    message: None
+    jobid: 0
+    input: results/all_cds.fasta, results/ribosomal_ids.txt
+    output: results/codon_weights.json
+Complete log(s): /home/anirudh/codon_optimization/.snakemake/log/2026-02-24T175056.312339.snakemake.log
+WorkflowError:
+At least one job did not complete successfully.

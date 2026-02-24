@@ -1,0 +1,132 @@
+Assuming unrestricted shared filesystem usage.
+host: DESKTOP-VPSEKSF
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                      count
+---------------------  -------
+all                          1
+build_genome_model           1
+build_ribosomal_model        1
+codon_bias_analysis          1
+extract_cds                  1
+final_report                 1
+fungal_filter                1
+ga_optimize                  1
+identify_ribosomal           1
+total                        9
+
+Select jobs to execute...
+Execute 1 jobs...
+[Tue Feb 24 20:51:27 2026]
+localrule extract_cds:
+    input: data/GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assembly_version_1.0_genomic.fna, data/GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assembly_version_1.0_genomic.gff
+    output: results/all_cds.fasta
+    jobid: 4
+    reason: Software environment definition has changed since last execution
+    resources: tmpdir=/tmp
+Activating conda environment: Reg
+Activating conda environment: Reg
+Select jobs to execute...
+[Tue Feb 24 20:51:30 2026]
+Finished jobid: 4 (Rule: extract_cds)
+1 of 9 steps (11%) done
+Execute 1 jobs...
+[Tue Feb 24 20:51:30 2026]
+localrule codon_bias_analysis:
+    input: results/all_cds.fasta
+    output: results/gene_metrics.tsv, results/wright_plot.pdf
+    jobid: 8
+    reason: Input files updated by another job: results/all_cds.fasta
+    resources: tmpdir=/tmp
+Select jobs to execute...
+Activating conda environment: bio-r
+[Tue Feb 24 20:51:37 2026]
+Finished jobid: 8 (Rule: codon_bias_analysis)
+2 of 9 steps (22%) done
+Execute 1 jobs...
+[Tue Feb 24 20:51:37 2026]
+localrule build_genome_model:
+    input: results/all_cds.fasta
+    output: results/codon_weights_genome.json
+    jobid: 6
+    reason: Missing output files: results/codon_weights_genome.json; Input files updated by another job: results/all_cds.fasta
+    resources: tmpdir=/tmp
+Select jobs to execute...
+Activating conda environment: Reg
+Activating conda environment: Reg
+[Tue Feb 24 20:51:38 2026]
+Finished jobid: 6 (Rule: build_genome_model)
+3 of 9 steps (33%) done
+Execute 1 jobs...
+[Tue Feb 24 20:51:38 2026]
+localrule identify_ribosomal:
+    input: data/GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assembly_version_1.0_genomic.gff
+    output: results/ribosomal_ids.txt
+    jobid: 5
+    reason: Code has changed since last execution
+    resources: tmpdir=/tmp
+[Tue Feb 24 20:51:39 2026]
+Finished jobid: 5 (Rule: identify_ribosomal)
+4 of 9 steps (44%) done
+Select jobs to execute...
+Execute 1 jobs...
+[Tue Feb 24 20:51:39 2026]
+localrule build_ribosomal_model:
+    input: results/all_cds.fasta, results/ribosomal_ids.txt
+    output: results/codon_weights_ribo.json
+    jobid: 3
+    reason: Missing output files: results/codon_weights_ribo.json; Input files updated by another job: results/ribosomal_ids.txt, results/all_cds.fasta
+    resources: tmpdir=/tmp
+Activating conda environment: Reg
+Activating conda environment: Reg
+[Tue Feb 24 20:51:39 2026]
+Finished jobid: 3 (Rule: build_ribosomal_model)
+5 of 9 steps (56%) done
+Select jobs to execute...
+Execute 1 jobs...
+[Tue Feb 24 20:51:39 2026]
+localrule ga_optimize:
+    input: data/alfa_nb_linker_mscarlet_protein.fasta, results/codon_weights_ribo.json, results/codon_weights_genome.json
+    output: results/optimized_sequence.fasta, results/ga_log.tsv
+    jobid: 2
+    reason: Missing output files: results/optimized_sequence.fasta, results/ga_log.tsv; Input files updated by another job: results/codon_weights_genome.json, results/codon_weights_ribo.json
+    resources: tmpdir=/tmp
+Activating conda environment: Reg
+Activating conda environment: Reg
+[Tue Feb 24 20:51:44 2026]
+Finished jobid: 2 (Rule: ga_optimize)
+6 of 9 steps (67%) done
+Select jobs to execute...
+Execute 1 jobs...
+[Tue Feb 24 20:51:44 2026]
+localrule fungal_filter:
+    input: results/optimized_sequence.fasta
+    output: results/final_sequence.fasta, results/fungal_warnings.txt
+    jobid: 7
+    reason: Missing output files: results/final_sequence.fasta; Input files updated by another job: results/optimized_sequence.fasta
+    resources: tmpdir=/tmp
+RuleException:
+FileNotFoundError in file "/home/anirudh/codon_optimization/Snakefile", line 101:
+[Errno 2] No such file or directory: '/home/anirudh/codon_optimization/scripts/fungal_filters.py'
+[Tue Feb 24 20:51:44 2026]
+Error in rule fungal_filter:
+    message: None
+    jobid: 7
+    input: results/optimized_sequence.fasta
+    output: results/final_sequence.fasta, results/fungal_warnings.txt
+    conda-env: Reg
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look below for error messages
+[Tue Feb 24 20:51:44 2026]
+Error in rule fungal_filter:
+    message: None
+    jobid: 7
+    input: results/optimized_sequence.fasta
+    output: results/final_sequence.fasta, results/fungal_warnings.txt
+    conda-env: Reg
+Complete log(s): /home/anirudh/codon_optimization/.snakemake/log/2026-02-24T205127.853829.snakemake.log
+WorkflowError:
+At least one job did not complete successfully.
