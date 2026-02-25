@@ -50,8 +50,9 @@ INTRON_MIN = config["splice"]["intron_min_distance"]
 INTRON_MAX = config["splice"]["intron_max_distance"]
 
 
-SNAPSHOT_COUNT = config['Snapshot']['count']
-SN = max(1, GENERATIONS // SNAPSHOT_COUNT) # getting intervals of snapshots
+snapshot_cfg = config.get('snapshot', config.get('Snapshot', {}))
+SNAPSHOT_COUNT = max(1, int(snapshot_cfg.get('count', 10)))
+SN = max(1, GENERATIONS // SNAPSHOT_COUNT)  # snapshot interval
 
 #############################################
 # Load weight models

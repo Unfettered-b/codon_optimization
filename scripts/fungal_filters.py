@@ -7,15 +7,21 @@ output_fasta = snakemake.output[0]
 output_warnings = snakemake.output[1]
 
 #############################################
-# Parameters (can move to config later)
+# Parameters
 #############################################
 
-WINDOW = 50
-LOW_GC = 0.30
-HIGH_GC = 0.70
+fungal_cfg = snakemake.config.get("fungal", {})
+splice_cfg = snakemake.config.get("splice", {})
 
-POLYA_MOTIFS = ["AATAAA", "ATTAAA"]
-DONOR_MOTIFS = ["AGGT", "CAGGT", "AAGGT", "GTATGT"]
+WINDOW = int(fungal_cfg.get("gc_window", 50))
+LOW_GC = float(fungal_cfg.get("low_gc", 0.30))
+HIGH_GC = float(fungal_cfg.get("high_gc", 0.70))
+
+POLYA_MOTIFS = fungal_cfg.get("polya_motifs", ["AATAAA", "ATTAAA"])
+DONOR_MOTIFS = fungal_cfg.get("donor_motifs", ["AGGT", "CAGGT", "AAGGT", "GTATGT"])
+
+INTRON_MIN_DISTANCE = int(splice_cfg.get("intron_min_distance", 20))
+INTRON_MAX_DISTANCE = int(splice_cfg.get("intron_max_distance", 200))
 
 #############################################
 # Utility functions
@@ -85,7 +91,7 @@ for motif, pos in donor_hits:
     warnings.append(f"Strong donor motif {motif} at position {pos}")
 
 # Intron-like GT...AG
-gt_ag_hits = find_gt_ag_pairs(seq)
+gt_ag_hits = find_gt_ag_pairs(seq, min_dist=INTRON_MIN_DISTANCE, max_dist=INTRON_MAX_DISTANCE)
 for start, end in gt_ag_hits:
     warnings.append(f"Potential intron GT...AG from {start} to {end}")
 
