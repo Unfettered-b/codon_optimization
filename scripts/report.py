@@ -2,22 +2,17 @@
 
 import pandas as pd
 from Bio import SeqIO
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
-from reportlab.platypus import Table, TableStyle
-from reportlab.lib import colors
-from reportlab.lib.styles import ParagraphStyle
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Image,
+    ListFlowable, ListItem
+)
 from reportlab.lib.units import inch
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfbase import pdfmetrics
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import PageBreak
-from reportlab.platypus import ListFlowable, ListItem
 
 #############################################
 # Inputs
 #############################################
 
-native_metrics_file = snakemake.input.native
 ga_log_file = snakemake.input.ga_log
 final_seq_file = snakemake.input.final_seq
 wright_plot_file = snakemake.input.wright
@@ -28,7 +23,6 @@ output_pdf = snakemake.output[0]
 # Load Data
 #############################################
 
-native_df = pd.read_csv(native_metrics_file, sep="\t")
 ga_log_df = pd.read_csv(ga_log_file, sep="\t")
 
 record = next(SeqIO.parse(final_seq_file, "fasta"))
@@ -61,6 +55,7 @@ elements = []
 styles = getSampleStyleSheet()
 title_style = styles["Heading1"]
 normal_style = styles["Normal"]
+heading_style = styles["Heading2"]
 
 #############################################
 # Title
@@ -70,49 +65,21 @@ elements.append(Paragraph("Codon Optimization Report", title_style))
 elements.append(Spacer(1, 0.3 * inch))
 
 #############################################
-# Native Metrics Section
-#############################################
-
-elements.append(Paragraph("1. Baseline (Native) Metrics", styles["Heading2"]))
-elements.append(Spacer(1, 0.2 * inch))
-
-native_data = [["Gene ID", "Length (nt)", "CAI_ribo", "CAI_genome", "Composite", "GC", "GC3"]]
-
-for _, row in native_df.iterrows():
-    native_data.append([
-        row.get("gene_id", ""),
-        row.get("length_nt", ""),
-        row.get("CAI_ribo", ""),
-        row.get("CAI_genome", ""),
-        row.get("Composite_score", ""),
-        row.get("GC", ""),
-        row.get("GC3", "")
-    ])
-
-table = Table(native_data, repeatRows=1)
-table.setStyle(TableStyle([
-    ('BACKGROUND', (0,0), (-1,0), colors.lightgrey),
-    ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-]))
-elements.append(table)
-elements.append(Spacer(1, 0.4 * inch))
-
-#############################################
 # GA Summary
 #############################################
 
-elements.append(Paragraph("2. Genetic Algorithm Optimization Summary", styles["Heading2"]))
+elements.append(Paragraph("1. Genetic Algorithm Optimization Summary", heading_style))
 elements.append(Spacer(1, 0.2 * inch))
 
 elements.append(Paragraph(f"Total generations: {final_generation}", normal_style))
-elements.append(Paragraph(f"Best composite fitness achieved: {round(best_fitness, 5)}", normal_style))
+elements.append(Paragraph(f"Best composite fitness achieved: {round(best_fitness, 6)}", normal_style))
 elements.append(Spacer(1, 0.4 * inch))
 
 #############################################
 # Final Sequence Metrics
 #############################################
 
-elements.append(Paragraph("3. Final Optimized Sequence Metrics", styles["Heading2"]))
+elements.append(Paragraph("2. Final Optimized Sequence Metrics", heading_style))
 elements.append(Spacer(1, 0.2 * inch))
 
 elements.append(Paragraph(f"Sequence length: {len(final_seq)} nt", normal_style))
@@ -124,7 +91,7 @@ elements.append(Spacer(1, 0.4 * inch))
 # Wright Plot
 #############################################
 
-elements.append(Paragraph("4. Genome Codon Bias (Wright Plot)", styles["Heading2"]))
+elements.append(Paragraph("3. Genome Codon Bias (Wright Plot)", heading_style))
 elements.append(Spacer(1, 0.2 * inch))
 
 img = Image(wright_plot_file, width=5*inch, height=4*inch)
@@ -135,15 +102,14 @@ elements.append(Spacer(1, 0.4 * inch))
 # Interpretation Notes
 #############################################
 
-elements.append(Paragraph("5. Interpretation Notes", styles["Heading2"]))
+elements.append(Paragraph("4. Interpretation Notes", heading_style))
 elements.append(Spacer(1, 0.2 * inch))
 
 notes = [
-    "CAI_ribo reflects adaptation to highly expressed ribosomal genes.",
-    "CAI_genome reflects conformity to genome-wide codon bias.",
-    "Composite fitness balances translational efficiency and genomic realism.",
-    "GC content is controlled to remain near genome average.",
-    "Cryptic splice site penalties were applied during optimization."
+    "Optimization balances translational efficiency and genome-wide codon conformity.",
+    "GC content is constrained using a Gaussian penalty centered on genome average.",
+    "Cryptic splice-site penalties were applied during genetic algorithm optimization.",
+    "Final sequence should be validated experimentally before synthesis."
 ]
 
 elements.append(ListFlowable(

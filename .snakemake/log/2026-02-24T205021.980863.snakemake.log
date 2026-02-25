@@ -1,8 +1,0 @@
-Assuming unrestricted shared filesystem usage.
-host: DESKTOP-VPSEKSF
-Building DAG of jobs...
-MissingInputException in rule final_report in file "/home/anirudh/codon_optimization/Snakefile", line 104:
-Missing input files for rule final_report:
-    output: results/optimization_report.pdf
-    affected files:
-        results/native_metrics.tsv

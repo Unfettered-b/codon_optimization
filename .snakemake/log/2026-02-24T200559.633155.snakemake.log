@@ -1,8 +1,0 @@
-Assuming unrestricted shared filesystem usage.
-host: DESKTOP-VPSEKSF
-Building DAG of jobs...
-MissingInputException in rule evaluate_native in file "/home/anirudh/codon_optimization/Snakefile", line 70:
-Missing input files for rule evaluate_native:
-    output: results/native_metrics.tsv
-    affected files:
-        data/nb_mng_protein.fasta
