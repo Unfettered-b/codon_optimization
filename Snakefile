@@ -96,6 +96,16 @@ rule build_genome_model:
         f"{RESULTS_DIR}/codon_weights_genome.json"
     script:
         "scripts/build_cai_model.py"
+
+rule build_codon_pair_table:
+    input: 
+        cds = f"{RESULTS_DIR}/all_cds.fasta"
+    conda:
+        "Reg"
+    output: 
+        pairs = f"{RESULTS_DIR}/codon_pairs.json"
+    script: 
+        "scripts/build_codon_pair_table.py"
 #############################################
 # -------------------------------
 # PHASE 2: CONSTRUCT OPTIMIZATION
@@ -106,7 +116,8 @@ rule ga_optimize:
         protein=config["protein"],
         ribo_weights=f"{RESULTS_DIR}/codon_weights_ribo.json",
         genome_weights=f"{RESULTS_DIR}/codon_weights_genome.json",
-        genome_cds=f"{RESULTS_DIR}/all_cds.fasta"
+        genome_cds=f"{RESULTS_DIR}/all_cds.fasta",
+        codon_pairs= f"{RESULTS_DIR}/codon_pairs.json"
     conda:
         "Reg"
     output:

@@ -1,13 +1,12 @@
 genome: "data/GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assembly_version_1.0_genomic.fna"
 gff: "data/GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assembly_version_1.0_genomic.gff"
-protein: "data/alfa_nb_linker_mscarlet_protein.fasta"
+protein: "data/afla_nb_linker_mNG_protein.fasta"
 
 run:
-  id: "v2_mNG"
-
+  id: "v8_mNG_scalar"
 
 ga:
-  mode: "pareto"   # scalar | pareto
+  mode: "scalar"               # scalar | pareto
   pareto_top_k: 10
   population_size: 120
   generations: 10000
@@ -15,19 +14,49 @@ ga:
   mutation_rate_final: 0.02
   elite_size: 10
   crossover_rate: 0.75
-  tournament_size: 4
+  tournament_size: 8
   immigrant_rate: 0.05
-  early_stop_patience: 1000
+  early_stop_patience: 5000
   min_improvement: 1.0e-10
   random_seed: 42
 
+  # Island model
+  n_islands: 4
+  migration_interval: 25
+  migration_size: 2
+
+  # Adaptive mutation
+  adaptive_mutation: true
+  adapt_window: 50
+
+  # Crossover
+  n_crossover_points: 2
+
+  # Population seeding
+  max_homologue_seeds: 10
+
 fitness:
-  alpha: 0.7
-  beta: 0.3
+  # CAI exponents — controls relative weight of ribosomal vs genomic CAI
+  alpha: 0.7              # exponent on cai_r (ribosomal)
+  beta: 0.3               # exponent on cai_g (genomic)
+
+  # 5-prime translational ramp
+  ramp_length: 50         # number of codons at 5-prime end treated as ramp
+  ramp_weight: 0.5        # down-weight factor for ramp codons (< 1.0)
+
+  # Codon-pair score
+  codon_pair_weight: 1.0  # exponent on codon-pair score (0 = disable)
+
+  # Per-term penalty exponents — tune these if one term dominates CAI
+  gc_weight: 0.8         # exponent on global GC penalty
+  splice_weight: 0.80      # exponent on fungal splice-site penalty
+  polya_weight: 0.5       # exponent on polyA signal penalty
+  local_gc_weight: 0.5    # exponent on local windowed GC penalty
+
 
 gc:
   use_genome_target: true
-  target: 0.52   # fallback when genome target cannot be computed
+  target: 0.52
   sigma: 0.05
 
 splice:
@@ -40,9 +69,9 @@ snapshot:
   count: 10
 
 fungal:
-  splice_penalty_weight: 5
-  polyA_penalty_weight: 3
-  structure_penalty_weight: 4
+  splice_penalty_weight: 0.7
+  polyA_penalty_weight: 0.7
+  structure_penalty_weight: 1
   gc_window: 50
   low_gc: 0.30
   high_gc: 0.70
