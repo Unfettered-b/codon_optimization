@@ -106,7 +106,7 @@ Optimization components:
 ✔ Early stopping on stagnation\
 ✔ Optional Pareto-front search (`ga.mode: pareto`)
 
-Outputs: - `optimized_sequence.fasta` - `ga_log.tsv` - `pareto_front.tsv` - `pareto_sequences.fasta`
+Outputs: - `optimized_sequence.fasta` - `ga_log.tsv` - `pareto_front.tsv` - `pareto_sequences.fasta` - `diagnostics/`
 
 ------------------------------------------------------------------------
 
@@ -124,7 +124,22 @@ Outputs: - `final_sequence.fasta` - `fungal_warnings.txt`
 
 ------------------------------------------------------------------------
 
-## 5️⃣ Automated Report
+## 5️⃣ Extended Diagnostics
+
+Generates additional plots for deeper interpretation:
+
+- ENC / GC3 distributions
+- Wright density + residual diagnostics
+- RSCU heatmap
+- CAI distribution overlays
+- Sliding GC and motif-risk maps
+- Pareto, diversity, entropy and PCA diagnostics
+
+Output: - `diagnostics/`
+
+------------------------------------------------------------------------
+
+## 6️⃣ Automated Report
 
 Generates:
 
