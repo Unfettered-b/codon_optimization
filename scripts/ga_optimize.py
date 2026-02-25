@@ -372,31 +372,30 @@ def fungal_polya_penalty(seq):
             penalty *= per_hit ** count
     return penalty
 
-
 def fungal_local_gc_penalty(seq):
     """
-    Slide a window of FUNGAL_GC_WINDOW nt across the sequence and penalise
-    any window whose GC falls outside [FUNGAL_LOW_GC, FUNGAL_HIGH_GC].
+    Sliding window GC penalty (AVERAGED, not multiplicative).
 
-    Penalty per bad window: Gaussian with sigma = GC_SIGMA, so the same
-    sigma used for global GC also controls local stringency.
-
-    Returns a value in (0, 1].
+    Returns mean window penalty in (0,1].
+    Prevents exponential collapse for long CDS.
     """
-    w      = FUNGAL_GC_WINDOW
+    w = FUNGAL_GC_WINDOW
     length = len(seq)
+
     if length < w:
         return 1.0
 
-    penalty = 1.0
+    penalties = []
+
     # Pre-count GC in first window
     gc_count = seq[:w].count("G") + seq[:w].count("C")
 
     for i in range(length - w + 1):
+
         if i > 0:
-            # Slide: remove outgoing base, add incoming base
             out_base = seq[i - 1]
-            in_base  = seq[i + w - 1]
+            in_base = seq[i + w - 1]
+
             if out_base in "GC":
                 gc_count -= 1
             if in_base in "GC":
@@ -405,62 +404,73 @@ def fungal_local_gc_penalty(seq):
         local_gc = gc_count / w
 
         if local_gc < FUNGAL_LOW_GC:
-            # Distance below lower bound
             delta = FUNGAL_LOW_GC - local_gc
-            penalty *= math.exp(-(delta ** 2) / (2 * GC_SIGMA ** 2))
-        elif local_gc > FUNGAL_HIGH_GC:
-            # Distance above upper bound
-            delta = local_gc - FUNGAL_HIGH_GC
-            penalty *= math.exp(-(delta ** 2) / (2 * GC_SIGMA ** 2))
+            penalties.append(
+                math.exp(-(delta ** 2) / (2 * GC_SIGMA ** 2))
+            )
 
-    return penalty
+        elif local_gc > FUNGAL_HIGH_GC:
+            delta = local_gc - FUNGAL_HIGH_GC
+            penalties.append(
+                math.exp(-(delta ** 2) / (2 * GC_SIGMA ** 2))
+            )
+        else:
+            penalties.append(1.0)
+
+    return sum(penalties) / len(penalties)
 
 
 # ---------------------------------------------------------------------------
 # Score cache + evaluate
 # ---------------------------------------------------------------------------
+
 score_cache: dict = {}
 
-
 def evaluate(codon_list):
-    dna    = codon_list_to_seq(codon_list)
+    dna = codon_list_to_seq(codon_list)
+
     cached = score_cache.get(dna)
     if cached is not None:
         return cached
 
-    cai_r        = compute_cai_windowed(codon_list, ribo_weights)
-    cai_g        = compute_cai_windowed(codon_list, genome_weights)
-    gc_score     = gc_penalty(dna)
-    splice_sc    = fungal_splice_penalty(dna)
-    polya_sc     = fungal_polya_penalty(dna)
-    local_gc_sc  = fungal_local_gc_penalty(dna)
-    cp_score     = compute_codon_pair_score(codon_list)
+    cai_r       = compute_cai_windowed(codon_list, ribo_weights)
+    cai_g       = compute_cai_windowed(codon_list, genome_weights)
+    gc_score    = gc_penalty(dna)
+    splice_sc   = fungal_splice_penalty(dna)
+    polya_sc    = fungal_polya_penalty(dna)
+    local_gc_sc = fungal_local_gc_penalty(dna)
+    cp_score    = compute_codon_pair_score(codon_list)
 
-    scalar_fitness = (
-        (cai_r        ** alpha)
-        * (cai_g      ** beta)
-        * (gc_score   ** GC_WEIGHT)
-        * (splice_sc  ** SPLICE_WEIGHT)
-        * (polya_sc   ** POLYA_WEIGHT)
-        * (local_gc_sc ** LOCAL_GC_WEIGHT)
-        * (cp_score   ** CODON_PAIR_WEIGHT)
+    EPS = 1e-12  # prevents log(0)
+
+    # ------------------------------
+    # LOG-DOMAIN SCALAR FITNESS
+    # ------------------------------
+    log_fitness = (
+        alpha * math.log(cai_r + EPS)
+        + beta * math.log(cai_g + EPS)
+        + GC_WEIGHT * math.log(gc_score + EPS)
+        + SPLICE_WEIGHT * math.log(splice_sc + EPS)
+        + POLYA_WEIGHT * math.log(polya_sc + EPS)
+        + LOCAL_GC_WEIGHT * math.log(local_gc_sc + EPS)
+        + CODON_PAIR_WEIGHT * math.log(cp_score + EPS)
     )
 
     result = {
-        "dna":          dna,
-        "cai_r":        cai_r,
-        "cai_g":        cai_g,
-        "gc":           compute_gc(dna),
-        "gc_score":     gc_score,
+        "dna": dna,
+        "cai_r": cai_r,
+        "cai_g": cai_g,
+        "gc": compute_gc(dna),
+        "gc_score": gc_score,
         "splice_score": splice_sc,
-        "polya_score":  polya_sc,
+        "polya_score": polya_sc,
         "local_gc_score": local_gc_sc,
-        "cp_score":     cp_score,
-        "fitness":      scalar_fitness,
+        "cp_score": cp_score,
+        "fitness": log_fitness,  # ← NOW LOG FITNESS
     }
+
     score_cache[dna] = result
     return result
-
 # ---------------------------------------------------------------------------
 # Mutation
 # ---------------------------------------------------------------------------
