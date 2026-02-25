@@ -30,7 +30,7 @@ sys.stderr.write(f"Results directory: {RESULTS_DIR}\n")
 
 rule all:
     input:
-        f"{RESULTS_DIR}/optimization_report.pdf"
+        f"{RESULTS_DIR}/{RUN_ID}optimization_report.pdf"
 
 #############################################
 # -------------------------------
@@ -186,6 +186,6 @@ rule final_report:
     conda:
         "Reg"
     output:
-        f"{RESULTS_DIR}/optimization_report.pdf"
+        f"{RESULTS_DIR}/{RUN_ID}optimization_report.pdf"
     script:
         "scripts/report.py"
