@@ -7,6 +7,7 @@ configfile: "config.yaml"
 
 import os
 from datetime import datetime
+import sys
 
 #############################################
 # RUN ID LOGIC
@@ -18,9 +19,10 @@ if not RUN_ID:
     RUN_ID = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 RESULTS_DIR = f"results/{RUN_ID}"
+sys.stderr.write(f"RUN_ID: {RUN_ID}\n")
+sys.stderr.write(f"Results directory: {RESULTS_DIR}\n")
 
-print(f"Running pipeline with RUN_ID: {RUN_ID}")
-print(f"Results directory: {RESULTS_DIR}")
+
 
 #############################################
 # FINAL TARGET
@@ -109,7 +111,8 @@ rule ga_optimize:
     output:
         f"{RESULTS_DIR}/optimized_sequence.fasta",
         f"{RESULTS_DIR}/ga_log.tsv",
-        f"{RESULTS_DIR}/fitness_plot.png"
+        f"{RESULTS_DIR}/fitness_plot.png",
+        f"{RESULTS_DIR}/intermediary_snapshots.fasta"
     script:
         "scripts/ga_optimize.py"
 
@@ -124,12 +127,25 @@ rule fungal_filter:
     script:
         "scripts/fungal_filters.py"
 
+rule cai_snapshot_plots:
+    input:
+        snapshots=f"{RESULTS_DIR}/intermediary_snapshots.fasta",
+        genome_weights=f"{RESULTS_DIR}/codon_weights_genome.json"
+    output:
+        directory(f"{RESULTS_DIR}/cai_plots")
+    conda:
+        "Reg"
+    script:
+        "scripts/cai_snapshot_plots.py"
+
+
 rule final_report:
     input:
         ga_log=f"{RESULTS_DIR}/ga_log.tsv",
         final_seq=f"{RESULTS_DIR}/final_sequence.fasta",
         wright=f"{RESULTS_DIR}/wright_plot.png",
-        fitness_plot=f"{RESULTS_DIR}/fitness_plot.png"
+        fitness_plot=f"{RESULTS_DIR}/fitness_plot.png",
+        cai_dir = directory(f"{RESULTS_DIR}/cai_plots")
     conda:
         "Reg"
     output:

@@ -18,8 +18,15 @@ genome_weights_file = snakemake.input.genome_weights
 output_fasta = snakemake.output[0]
 output_log = snakemake.output[1]
 output_plot = snakemake.output[2]
+snapshots_fasta = snakemake.output[3]
 
 config = snakemake.config
+
+
+# clear snapshots output file
+
+open(snapshots_fasta, "w").close()
+
 
 #############################################
 # Load parameters from config
@@ -41,6 +48,10 @@ DONOR_PENALTY = config["splice"]["donor_penalty"]
 INTRON_PENALTY = config["splice"]["intron_penalty"]
 INTRON_MIN = config["splice"]["intron_min_distance"]
 INTRON_MAX = config["splice"]["intron_max_distance"]
+
+
+SNAPSHOT_COUNT = config['Snapshot']['count']
+SN = max(1, GENERATIONS // SNAPSHOT_COUNT) # getting intervals of snapshots
 
 #############################################
 # Load weight models
@@ -184,6 +195,12 @@ for gen in range(GENERATIONS):
         "mean_fitness": mean_fit
     })
 
+    if gen % SN == 0 or gen == GENERATIONS - 1:
+        best_seq = codon_list_to_seq(population[0]["codons"])
+
+        with open(snapshots_fasta, "a") as f:
+            f.write(f">generation_{gen}_fitness_{best_fit:.6f}\n")
+            f.write(best_seq + "\n")
     
     new_population = population[:ELITE_SIZE]
 
