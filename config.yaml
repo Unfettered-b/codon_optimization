@@ -3,11 +3,11 @@ gff: "data/GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assemb
 protein: "data/alfa_nb_linker_mscarlet_protein.fasta"
 
 run:
-  id: "Run_4"
+  id: "v2_mNG"
 
 
 ga:
-  mode: "scalar"   # scalar | pareto
+  mode: "pareto"   # scalar | pareto
   pareto_top_k: 10
   population_size: 120
   generations: 10000

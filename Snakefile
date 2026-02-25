@@ -180,9 +180,9 @@ rule final_report:
         wright=f"{RESULTS_DIR}/wright_plot.png",
         fitness_plot=f"{RESULTS_DIR}/fitness_plot.png",
         pareto_front=f"{RESULTS_DIR}/pareto_front.tsv",
-        diagnostics=directory(f"{RESULTS_DIR}/diagnostics"),
-        cai_dir = directory(f"{RESULTS_DIR}/cai_plots"),
-        codon_usage_grid = directory(f"{RESULTS_DIR}/codon_usage_grid")
+        diagnostics=f"{RESULTS_DIR}/diagnostics",
+        cai_dir = f"{RESULTS_DIR}/cai_plots",
+        codon_usage_grid = f"{RESULTS_DIR}/codon_usage_grid"
     conda:
         "Reg"
     output:
