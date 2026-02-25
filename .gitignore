@@ -1,2 +1,6 @@
 .snakemake/
 archive/
+
+__pycache__/
+*.pyc
+results/*/

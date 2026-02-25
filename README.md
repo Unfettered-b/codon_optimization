@@ -73,7 +73,7 @@ This avoids:
 -   Generate Wright plot\
 -   Identify ribosomal genes
 
-Outputs: - `all_cds.fasta` - `gene_metrics.tsv` - `wright_plot.pdf` -
+Outputs: - `all_cds.fasta` - `gene_metrics.tsv` - `wright_plot.png` -
 `ribosomal_ids.txt`
 
 ------------------------------------------------------------------------
@@ -154,6 +154,14 @@ fitness:
 gc:
   target: 0.52
   sigma: 0.05
+
+snapshot:
+  count: 10
+
+fungal:
+  gc_window: 50
+  low_gc: 0.30
+  high_gc: 0.70
 ```
 
 ------------------------------------------------------------------------
