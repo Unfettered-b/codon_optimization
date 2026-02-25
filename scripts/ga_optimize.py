@@ -4,10 +4,11 @@ import json
 import math
 import random
 import pandas as pd
+import matplotlib.pyplot as plt
 from Bio import SeqIO
 
 #############################################
-# Inputs
+# Snakemake I/O
 #############################################
 
 protein_fasta = snakemake.input.protein
@@ -16,6 +17,7 @@ genome_weights_file = snakemake.input.genome_weights
 
 output_fasta = snakemake.output[0]
 output_log = snakemake.output[1]
+output_plot = snakemake.output[2]
 
 config = snakemake.config
 
@@ -78,12 +80,12 @@ aa_to_codons = {
 }
 
 #############################################
-# Utility functions
+# Utility Functions
 #############################################
 
 def backtranslate_max(protein_seq):
     return [
-        max(aa_to_codons[aa], key=lambda c: ribo_weights.get(c, 0))
+        max(aa_to_codons[aa], key=lambda c: ribo_weights.get(c, 1e-8))
         for aa in protein_seq
     ]
 
@@ -172,29 +174,58 @@ log_rows = []
 for gen in range(GENERATIONS):
 
     population.sort(key=lambda x: x["fitness"], reverse=True)
+
+    best_fit = population[0]["fitness"]
+    mean_fit = sum(ind["fitness"] for ind in population) / POP_SIZE
+
     log_rows.append({
         "generation": gen,
-        "best_fitness": population[0]["fitness"]
+        "best_fitness": best_fit,
+        "mean_fitness": mean_fit
     })
 
+    
     new_population = population[:ELITE_SIZE]
 
     while len(new_population) < POP_SIZE:
         parent = tournament(population)
-        child = mutate(parent["codons"], protein_seq)
+        child_codons = mutate(parent["codons"], protein_seq)
         new_population.append({
-            "codons": child,
-            "fitness": fitness(child)
+            "codons": child_codons,
+            "fitness": fitness(child_codons)
         })
 
     population = new_population
 
+#############################################
+# Final Best Individual
+#############################################
+
 population.sort(key=lambda x: x["fitness"], reverse=True)
 best = population[0]
-
 best_seq = codon_list_to_seq(best["codons"])
 
 with open(output_fasta, "w") as f:
     f.write(f">{record.id}_optimized\n{best_seq}\n")
 
-pd.DataFrame(log_rows).to_csv(output_log, sep="\t", index=False)
+#############################################
+# Write GA Log
+#############################################
+
+ga_log_df = pd.DataFrame(log_rows)
+ga_log_df.to_csv(output_log, sep="\t", index=False)
+
+#############################################
+# Fitness vs Generation Plot
+#############################################
+
+plt.figure()
+plt.plot(ga_log_df["generation"], ga_log_df["best_fitness"], label="Best")
+plt.plot(ga_log_df["generation"], ga_log_df["mean_fitness"], label="Mean")
+plt.xlabel("Generation")
+plt.ylabel("Fitness")
+plt.title("Fitness Across Generations")
+plt.legend()
+plt.tight_layout()
+plt.savefig(output_plot)
+plt.close()

@@ -16,6 +16,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 ga_log_file = snakemake.input.ga_log
 final_seq_file = snakemake.input.final_seq
 wright_plot_file = snakemake.input.wright
+fitness_plot_file = snakemake.input.fitness_plot
 
 output_pdf = snakemake.output[0]
 
@@ -73,6 +74,15 @@ elements.append(Spacer(1, 0.2 * inch))
 
 elements.append(Paragraph(f"Total generations: {final_generation}", normal_style))
 elements.append(Paragraph(f"Best composite fitness achieved: {round(best_fitness, 6)}", normal_style))
+elements.append(Spacer(1, 0.4 * inch))
+
+#############################################
+# GA Progression plot
+#############################################
+
+elements.append(Paragraph("Fitness Progression", heading_style))
+elements.append(Spacer(1, 0.2 * inch))
+elements.append(Image(fitness_plot_file, width=5*inch, height=3*inch))
 elements.append(Spacer(1, 0.4 * inch))
 
 #############################################

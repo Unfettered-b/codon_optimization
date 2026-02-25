@@ -3,7 +3,7 @@ gff: "data/GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assemb
 protein: "data/alfa_nb_linker_mscarlet_protein.fasta"
 
 run:
-  id: "Run_1"
+  id: "Run_2"
 
 
 ga:

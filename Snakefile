@@ -108,10 +108,10 @@ rule ga_optimize:
         "Reg"
     output:
         f"{RESULTS_DIR}/optimized_sequence.fasta",
-        f"{RESULTS_DIR}/ga_log.tsv"
+        f"{RESULTS_DIR}/ga_log.tsv",
+        f"{RESULTS_DIR}/fitness_plot.png"
     script:
         "scripts/ga_optimize.py"
-
 
 rule fungal_filter:
     input:
@@ -128,7 +128,8 @@ rule final_report:
     input:
         ga_log=f"{RESULTS_DIR}/ga_log.tsv",
         final_seq=f"{RESULTS_DIR}/final_sequence.fasta",
-        wright=f"{RESULTS_DIR}/wright_plot.png"
+        wright=f"{RESULTS_DIR}/wright_plot.png",
+        fitness_plot=f"{RESULTS_DIR}/fitness_plot.png"
     conda:
         "Reg"
     output:

@@ -1,0 +1,33 @@
+genome: "data/GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assembly_version_1.0_genomic.fna"
+gff: "data/GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assembly_version_1.0_genomic.gff"
+protein: "data/alfa_nb_linker_mscarlet_protein.fasta"
+
+run:
+  id: "Run_2"
+
+
+ga:
+  population_size: 120
+  generations: 10000
+  mutation_rate: 0.07
+  elite_size: 10
+  random_seed: 42
+
+fitness:
+  alpha: 0.7
+  beta: 0.3
+
+gc:
+  target: 0.52
+  sigma: 0.05
+
+splice:
+  donor_penalty: 0.8
+  intron_penalty: 0.9
+  intron_min_distance: 20
+  intron_max_distance: 200
+
+fungal:
+  splice_penalty_weight: 5
+  polyA_penalty_weight: 3
+  structure_penalty_weight: 4
