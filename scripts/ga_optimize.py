@@ -131,7 +131,7 @@ USE_ADAPTIVE_MUTATION = bool(ga_cfg.get("adaptive_mutation", True))
 ADAPT_WINDOW          = int(ga_cfg.get("adapt_window", 50))
 N_CROSSOVER_POINTS    = int(ga_cfg.get("n_crossover_points", 2))
 MAX_HOMOLOGUE_SEEDS   = int(ga_cfg.get("max_homologue_seeds", 10))
-
+MUTATION_GAMMA = float(ga_cfg.get("mutation_bias_gamma", 0.0))
 random.seed(RANDOM_SEED)
 
 fit_cfg           = config.get("fitness", {})
@@ -170,6 +170,8 @@ FUNGAL_HIGH_GC         = float(fungal_cfg.get("high_gc", 0.70))
 FUNGAL_POLYA_MOTIFS    = list(fungal_cfg.get("polya_motifs", ["AATAAA", "ATTAAA"]))
 FUNGAL_DONOR_MOTIFS    = list(fungal_cfg.get("donor_motifs",
                               ["AGGT", "CAGGT", "AAGGT", "GTATGT"]))
+
+
 
 snapshot_cfg   = config.get("snapshot", config.get("Snapshot", {}))
 SNAPSHOT_COUNT = max(1, int(snapshot_cfg.get("count", 10)))
@@ -296,7 +298,7 @@ def compute_cai_windowed(codon_list, weights):
     """CAI with a 5-prime translational ramp."""
     log_sum = eff_len = 0.0
     for i, codon in enumerate(codon_list):
-        w          = weights.get(codon, 1e-8)
+        w          = max(0.01, (weights.get(codon, 1e-8) - 0.1))
         pos_weight = RAMP_WEIGHT if i < RAMP_LENGTH else 1.0
         log_sum   += pos_weight * math.log(w)
         eff_len   += pos_weight
@@ -481,7 +483,16 @@ def mutate(codon_list, protein_seq, mutation_rate, position_rates=None):
             continue
         rate = position_rates[i] if position_rates is not None else mutation_rate
         if random.random() < rate:
-            new[i] = random.choice(aa_to_codons[aa])
+            codons = aa_to_codons[aa]
+
+            if MUTATION_GAMMA > 0:
+                weights = [
+                    ribo_weights.get(c, 1e-8) ** MUTATION_GAMMA
+                    for c in codons
+                ]
+                new[i] = random.choices(codons, weights=weights, k=1)[0]
+            else:
+                new[i] = random.choice(codons)
     return new
 
 

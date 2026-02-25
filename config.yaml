@@ -3,10 +3,10 @@ gff: "data/GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assemb
 protein: "data/afla_nb_linker_mNG_protein.fasta"
 
 run:
-  id: "v8_mNG_scalar"
+  id: "v13_mNG"
 
 ga:
-  mode: "scalar"               # scalar | pareto
+  mode: "pareto"               # scalar | pareto
   pareto_top_k: 10
   population_size: 120
   generations: 10000
@@ -35,23 +35,25 @@ ga:
   # Population seeding
   max_homologue_seeds: 10
 
+  mutation_bias_gamma: 1.5
+
 fitness:
   # CAI exponents — controls relative weight of ribosomal vs genomic CAI
-  alpha: 0.7              # exponent on cai_r (ribosomal)
-  beta: 0.3               # exponent on cai_g (genomic)
+  alpha: 1            # exponent on cai_r (ribosomal)
+  beta: 0.8              # exponent on cai_g (genomic)
 
   # 5-prime translational ramp
   ramp_length: 50         # number of codons at 5-prime end treated as ramp
   ramp_weight: 0.5        # down-weight factor for ramp codons (< 1.0)
 
   # Codon-pair score
-  codon_pair_weight: 1.0  # exponent on codon-pair score (0 = disable)
+  codon_pair_weight: 0.4  # exponent on codon-pair score (0 = disable)
 
   # Per-term penalty exponents — tune these if one term dominates CAI
-  gc_weight: 0.8         # exponent on global GC penalty
-  splice_weight: 0.80      # exponent on fungal splice-site penalty
-  polya_weight: 0.5       # exponent on polyA signal penalty
-  local_gc_weight: 0.5    # exponent on local windowed GC penalty
+  gc_weight: 0.3        # exponent on global GC penalty
+  splice_weight: 0.2      # exponent on fungal splice-site penalty
+  polya_weight: 0.15       # exponent on polyA signal penalty
+  local_gc_weight: 0.05    # exponent on local windowed GC penalty
 
 
 gc:
@@ -69,11 +71,11 @@ snapshot:
   count: 10
 
 fungal:
-  splice_penalty_weight: 0.7
-  polyA_penalty_weight: 0.7
+  splice_penalty_weight: 1.5
+  polyA_penalty_weight: 2
   structure_penalty_weight: 1
-  gc_window: 50
-  low_gc: 0.30
-  high_gc: 0.70
+  gc_window: 60
+  low_gc: 0.25
+  high_gc: 0.75
   polya_motifs: ["AATAAA", "ATTAAA"]
   donor_motifs: ["AGGT", "CAGGT", "AAGGT", "GTATGT"]
