@@ -7,10 +7,18 @@ run:
 
 
 ga:
+  mode: "scalar"   # scalar | pareto
+  pareto_top_k: 10
   population_size: 120
   generations: 10000
   mutation_rate: 0.07
+  mutation_rate_final: 0.02
   elite_size: 10
+  crossover_rate: 0.75
+  tournament_size: 4
+  immigrant_rate: 0.05
+  early_stop_patience: 1000
+  min_improvement: 1.0e-10
   random_seed: 42
 
 fitness:
@@ -18,7 +26,8 @@ fitness:
   beta: 0.3
 
 gc:
-  target: 0.52
+  use_genome_target: true
+  target: 0.52   # fallback when genome target cannot be computed
   sigma: 0.05
 
 splice:

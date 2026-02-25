@@ -21,6 +21,7 @@ ga_log_file = snakemake.input.ga_log
 final_seq_file = snakemake.input.final_seq
 wright_plot_file = snakemake.input.wright
 fitness_plot_file = snakemake.input.fitness_plot
+pareto_front_file = snakemake.input.pareto_front
 cai_dir = snakemake.input.cai_dir
 grid_dir = snakemake.input.codon_usage_grid
 
@@ -31,6 +32,7 @@ output_pdf = snakemake.output[0]
 #############################################
 
 ga_log_df = pd.read_csv(ga_log_file, sep="\t")
+pareto_df = pd.read_csv(pareto_front_file, sep="\t")
 
 record = next(SeqIO.parse(final_seq_file, "fasta"))
 final_seq = str(record.seq)
@@ -99,6 +101,22 @@ elements.append(Spacer(1, 0.2 * inch))
 
 elements.append(Paragraph(f"Total generations: {final_generation}", normal_style))
 elements.append(Paragraph(f"Best composite fitness achieved: {round(best_fitness, 6)}", normal_style))
+
+if "mode" in ga_log_df.columns:
+    mode = str(ga_log_df["mode"].iloc[-1])
+    elements.append(Paragraph(f"Optimization mode: {mode}", normal_style))
+
+if len(pareto_df) > 0:
+    top = pareto_df.iloc[0]
+    elements.append(Paragraph(f"Top exported candidates: {len(pareto_df)}", normal_style))
+    elements.append(Paragraph(
+        f"Top candidate metrics — CAI_r: {top['cai_r']:.4f}, CAI_g: {top['cai_g']:.4f}, GC: {top['gc']:.4f}",
+        normal_style,
+    ))
+
+if "gc_target" in ga_log_df.columns:
+    elements.append(Paragraph(f"GC target used in optimization: {float(ga_log_df['gc_target'].iloc[-1]):.4f}", normal_style))
+
 elements.append(Spacer(1, 0.4 * inch))
 
 #############################################
