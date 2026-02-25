@@ -1,6 +1,6 @@
 .snakemake/
 archive/
-
+cosmo0.9/
 __pycache__/
 *.pyc
 results/*/
