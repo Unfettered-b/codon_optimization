@@ -139,13 +139,26 @@ rule cai_snapshot_plots:
         "scripts/cai_snapshot_plots.py"
 
 
+rule codon_usage_grid:
+    input:
+        genome_weights=f"{RESULTS_DIR}/codon_weights_genome.json",
+        ribo_weights=f"{RESULTS_DIR}/codon_weights_ribo.json",
+        final_seq=f"{RESULTS_DIR}/final_sequence.fasta"
+    output:
+        directory(f"{RESULTS_DIR}/codon_usage_grid")
+    conda:
+        "Reg"
+    script:
+        "scripts/codon_usage_grid.py"
+
 rule final_report:
     input:
         ga_log=f"{RESULTS_DIR}/ga_log.tsv",
         final_seq=f"{RESULTS_DIR}/final_sequence.fasta",
         wright=f"{RESULTS_DIR}/wright_plot.png",
         fitness_plot=f"{RESULTS_DIR}/fitness_plot.png",
-        cai_dir = directory(f"{RESULTS_DIR}/cai_plots")
+        cai_dir = directory(f"{RESULTS_DIR}/cai_plots"),
+        codon_usage_grid = directory(f"{RESULTS_DIR}/codon_usage_grid")
     conda:
         "Reg"
     output:

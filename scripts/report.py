@@ -22,6 +22,7 @@ final_seq_file = snakemake.input.final_seq
 wright_plot_file = snakemake.input.wright
 fitness_plot_file = snakemake.input.fitness_plot
 cai_dir = snakemake.input.cai_dir
+grid_dir = snakemake.input.codon_usage_grid
 
 output_pdf = snakemake.output[0]
 
@@ -154,6 +155,18 @@ elements.append(Spacer(1, 0.2 * inch))
 
 fasta_text = f">{record.id}\n{format_fasta(final_seq)}"
 elements.append(Preformatted(fasta_text, fasta_style))
+
+elements.append(PageBreak())
+elements.append(Paragraph("2.2 Codon Usage Comparison", sub_heading_style))
+
+grid_images = sorted(
+    [f for f in os.listdir(grid_dir) if f.endswith(".png")]
+)
+
+for img in grid_images:
+    img_path = os.path.join(grid_dir, img)
+    elements.append(Image(img_path, width=6.5*inch, height=9*inch))
+    elements.append(PageBreak())
 
 #############################################
 # Wright Plot
