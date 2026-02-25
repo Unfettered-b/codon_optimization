@@ -73,7 +73,7 @@ This avoids:
 -   Generate Wright plot\
 -   Identify ribosomal genes
 
-Outputs: - `all_cds.fasta` - `gene_metrics.tsv` - `wright_plot.pdf` -
+Outputs: - `all_cds.fasta` - `gene_metrics.tsv` - `wright_plot.png` -
 `ribosomal_ids.txt`
 
 ------------------------------------------------------------------------
@@ -100,9 +100,13 @@ Optimization components:
 ✔ CAI adaptation to ribosomal genes\
 ✔ Genome-wide conformity\
 ✔ Gaussian GC constraint\
-✔ Cryptic splice suppression
+✔ Cryptic splice suppression\
+✔ Crossover + adaptive mutation schedule\
+✔ Diversity-preserving random immigrants\
+✔ Early stopping on stagnation\
+✔ Optional Pareto-front search (`ga.mode: pareto`)
 
-Outputs: - `optimized_sequence.fasta` - `ga_log.tsv`
+Outputs: - `optimized_sequence.fasta` - `ga_log.tsv` - `pareto_front.tsv` - `pareto_sequences.fasta` - `diagnostics/`
 
 ------------------------------------------------------------------------
 
@@ -120,7 +124,22 @@ Outputs: - `final_sequence.fasta` - `fungal_warnings.txt`
 
 ------------------------------------------------------------------------
 
-## 5️⃣ Automated Report
+## 5️⃣ Extended Diagnostics
+
+Generates additional plots for deeper interpretation:
+
+- ENC / GC3 distributions
+- Wright density + residual diagnostics
+- RSCU heatmap
+- CAI distribution overlays
+- Sliding GC and motif-risk maps
+- Pareto, diversity, entropy and PCA diagnostics
+
+Output: - `diagnostics/`
+
+------------------------------------------------------------------------
+
+## 6️⃣ Automated Report
 
 Generates:
 
@@ -142,18 +161,35 @@ Example:
 
 ``` yaml
 ga:
+  mode: "scalar"   # scalar | pareto
+  pareto_top_k: 10
   population_size: 120
   generations: 250
-  mutation_rate: 0.05
-  elite_size: 5
+  mutation_rate: 0.07
+  mutation_rate_final: 0.02
+  elite_size: 10
+  crossover_rate: 0.75
+  tournament_size: 4
+  immigrant_rate: 0.05
+  early_stop_patience: 500
+  min_improvement: 1.0e-10
 
 fitness:
   alpha: 0.7
   beta: 0.3
 
 gc:
-  target: 0.52
+  use_genome_target: true
+  target: 0.52   # fallback if genome target cannot be computed
   sigma: 0.05
+
+snapshot:
+  count: 10
+
+fungal:
+  gc_window: 50
+  low_gc: 0.30
+  high_gc: 0.70
 ```
 
 ------------------------------------------------------------------------

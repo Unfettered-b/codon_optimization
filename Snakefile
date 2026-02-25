@@ -105,14 +105,17 @@ rule ga_optimize:
     input:
         protein=config["protein"],
         ribo_weights=f"{RESULTS_DIR}/codon_weights_ribo.json",
-        genome_weights=f"{RESULTS_DIR}/codon_weights_genome.json"
+        genome_weights=f"{RESULTS_DIR}/codon_weights_genome.json",
+        genome_cds=f"{RESULTS_DIR}/all_cds.fasta"
     conda:
         "Reg"
     output:
-        f"{RESULTS_DIR}/optimized_sequence.fasta",
-        f"{RESULTS_DIR}/ga_log.tsv",
-        f"{RESULTS_DIR}/fitness_plot.png",
-        f"{RESULTS_DIR}/intermediary_snapshots.fasta"
+        optimized=f"{RESULTS_DIR}/optimized_sequence.fasta",
+        log=f"{RESULTS_DIR}/ga_log.tsv",
+        plot=f"{RESULTS_DIR}/fitness_plot.png",
+        snapshots=f"{RESULTS_DIR}/intermediary_snapshots.fasta",
+        pareto_front=f"{RESULTS_DIR}/pareto_front.tsv",
+        pareto_sequences=f"{RESULTS_DIR}/pareto_sequences.fasta"
     script:
         "scripts/ga_optimize.py"
 
@@ -151,12 +154,33 @@ rule codon_usage_grid:
     script:
         "scripts/codon_usage_grid.py"
 
+
+rule diagnostics_plots:
+    input:
+        all_cds=f"{RESULTS_DIR}/all_cds.fasta",
+        gene_metrics=f"{RESULTS_DIR}/gene_metrics.tsv",
+        ribosomal_ids=f"{RESULTS_DIR}/ribosomal_ids.txt",
+        ribo_weights=f"{RESULTS_DIR}/codon_weights_ribo.json",
+        genome_weights=f"{RESULTS_DIR}/codon_weights_genome.json",
+        final_seq=f"{RESULTS_DIR}/final_sequence.fasta",
+        pareto_front=f"{RESULTS_DIR}/pareto_front.tsv",
+        pareto_sequences=f"{RESULTS_DIR}/pareto_sequences.fasta",
+        ga_log=f"{RESULTS_DIR}/ga_log.tsv"
+    output:
+        directory(f"{RESULTS_DIR}/diagnostics")
+    conda:
+        "Reg"
+    script:
+        "scripts/diagnostic_plots.py"
+
 rule final_report:
     input:
         ga_log=f"{RESULTS_DIR}/ga_log.tsv",
         final_seq=f"{RESULTS_DIR}/final_sequence.fasta",
         wright=f"{RESULTS_DIR}/wright_plot.png",
         fitness_plot=f"{RESULTS_DIR}/fitness_plot.png",
+        pareto_front=f"{RESULTS_DIR}/pareto_front.tsv",
+        diagnostics=directory(f"{RESULTS_DIR}/diagnostics"),
         cai_dir = directory(f"{RESULTS_DIR}/cai_plots"),
         codon_usage_grid = directory(f"{RESULTS_DIR}/codon_usage_grid")
     conda:
