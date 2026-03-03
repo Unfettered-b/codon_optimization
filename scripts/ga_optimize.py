@@ -128,7 +128,8 @@ MIGRATION_INTERVAL = int(ga_cfg.get("migration_interval", 25))
 MIGRATION_SIZE     = int(ga_cfg.get("migration_size", 2))
 
 USE_ADAPTIVE_MUTATION = bool(ga_cfg.get("adaptive_mutation", True))
-SKIP_LOWEST = bool(ga_cfg.get("skip_lowest", False))
+SKIP_LOWEST           = bool(ga_cfg.get("skip_lowest", False))
+SKIP_LOW_THRESHOLD    = float(ga_cfg.get("skip_low_threshold", 0.1))
 ADAPT_WINDOW          = int(ga_cfg.get("adapt_window", 50))
 N_CROSSOVER_POINTS    = int(ga_cfg.get("n_crossover_points", 2))
 MAX_HOMOLOGUE_SEEDS   = int(ga_cfg.get("max_homologue_seeds", 10))
@@ -492,10 +493,24 @@ def mutate(codon_list, protein_seq, mutation_rate, position_rates=None):
 
             codons = aa_to_codons[aa]
 
-            # ---- Skip lowest abundance codon if enabled ----
+            # ---- Apply low-weight threshold filter ----
+            if len(codons) > 1:
+                filtered = [
+                    c for c in codons
+                    if ribo_weights.get(c, 1e-8) >= SKIP_LOW_THRESHOLD
+                ]
+                if filtered:  # only replace if we didn't eliminate everything
+                    codons = filtered
+
+            # ---- Skip absolute lowest codon if enabled ----
             if SKIP_LOWEST and len(codons) > 1:
                 min_weight = min(ribo_weights.get(c, 1e-8) for c in codons)
-                codons = [c for c in codons if ribo_weights.get(c, 1e-8) > min_weight]
+                filtered = [
+                    c for c in codons
+                    if ribo_weights.get(c, 1e-8) > min_weight
+                ]
+                if filtered:
+                    codons = filtered
 
             # ---- Mutation selection ----
             if MUTATION_GAMMA > 0:

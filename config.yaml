@@ -3,7 +3,7 @@ gff: "data/GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assemb
 protein: "data/afla_nb_linker_mNG_protein.fasta"
 
 run:
-  id: "v13_mNG"
+  id: "v14_mNG"
 
 ga:
   mode: "pareto"               # scalar | pareto
@@ -19,7 +19,8 @@ ga:
   early_stop_patience: 5000
   min_improvement: 1.0e-10
   random_seed: 42
-  skip_lowest: True
+  skip_lowest: False
+  skip_low_threshold: 0.15
 
   # Island model
   n_islands: 4
