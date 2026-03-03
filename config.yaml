@@ -19,6 +19,7 @@ ga:
   early_stop_patience: 5000
   min_improvement: 1.0e-10
   random_seed: 42
+  skip_lowest: True
 
   # Island model
   n_islands: 4
